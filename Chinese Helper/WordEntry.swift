@@ -17,7 +17,7 @@ final class WordEntry {
     var hanzi: String
     var category: String
     var easeFactor: Double = 2.5
-    var nextReview: Date = .distantPast
+    var nextReview: Date = Date.distantPast
     var easyCount: Int = 0
     var seenCount: Int = 0
     var isLearned: Bool = false

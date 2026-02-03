@@ -37,7 +37,7 @@ struct DatabaseView: View {
                 }
                 .onDelete(perform: deleteAtOffsets)
             }
-            .navigationTitle("Words")
+            .navigationTitle("Database")
             .searchable(text: $searchText, prompt: "Search")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -121,28 +121,28 @@ struct WordRow: View {
     @State private var animatePlay: Bool = false
 
     private var statusText: String {
-        if w.repetition == 0 {
+        if w.isLearned {
+            return "Learned"
+        }
+        if w.seenCount == 0 {
             return "New"
         }
-        if w.nextReview <= Date() {
-            return "Due"
-        }
-        return "Scheduled"
+        return "In progress"
     }
 
     private var statusIcon: String {
         switch statusText {
-        case "New": return "sparkles"
-        case "Due": return "clock.badge.exclamationmark"
-        default: return "calendar"
+        case "Learned": return "checkmark.seal.fill"
+        case "In progress": return "arrow.triangle.2.circlepath"
+        default: return "sparkles"
         }
     }
 
     private var statusColor: Color {
         switch statusText {
-        case "New": return .blue
-        case "Due": return .orange
-        default: return .secondary
+        case "Learned": return .green
+        case "In progress": return .orange
+        default: return .blue
         }
     }
 
@@ -177,13 +177,19 @@ struct WordRow: View {
                     .font(.caption)
                     .foregroundStyle(statusColor)
 
-                Text("Reps: \(w.repetition)")
+                Text("Seen: \(w.seenCount)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Text("Next: \(reviewDateFormatter.string(from: w.nextReview))")
+                Text("Easy: \(w.easyCount)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                if w.isLearned {
+                    Text("Review tomorrow")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }

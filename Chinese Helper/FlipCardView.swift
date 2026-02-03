@@ -10,6 +10,7 @@ import SwiftUI
 struct FlipCardView: View {
     let front: String
     let back: String
+    let audioOnFront: Bool
     let onPlay: (() -> Void)?
 
     @State private var flipped = false
@@ -18,7 +19,7 @@ struct FlipCardView: View {
     var body: some View {
         ZStack {
             // FRONT (Polish)
-            cardSide(text: front, showAudio: false)
+            cardSide(text: front, showAudio: audioOnFront)
                 .opacity(flipped ? 0 : 1)
                 .rotation3DEffect(
                     .degrees(flipped ? 180 : 0),
@@ -26,7 +27,7 @@ struct FlipCardView: View {
                 )
 
             // BACK (Chinese + audio)
-            cardSide(text: back, showAudio: true)
+            cardSide(text: back, showAudio: !audioOnFront)
                 .opacity(flipped ? 1 : 0)
                 .rotation3DEffect(
                     .degrees(flipped ? 0 : -180),
@@ -39,16 +40,20 @@ struct FlipCardView: View {
             }
         }
         .onChange(of: flipped) { newValue in
-            if newValue {
-                Task {
-                    try? await Task.sleep(nanoseconds: 150_000_000)
-                    onPlay?()
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        animatePlay = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        animatePlay = false
-                    }
+            let audioSideIsVisible =
+                (audioOnFront && !newValue) ||
+                (!audioOnFront && newValue)
+
+            guard audioSideIsVisible else { return }
+
+            Task {
+                try? await Task.sleep(nanoseconds: 150_000_000)
+                onPlay?()
+                withAnimation(.easeOut(duration: 0.3)) {
+                    animatePlay = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    animatePlay = false
                 }
             }
         }

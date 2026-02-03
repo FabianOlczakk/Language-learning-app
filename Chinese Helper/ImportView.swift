@@ -19,7 +19,7 @@ struct ImportView: View {
     @State private var importMode: ImportMode = .skipExisting
     @State private var languageCode: String = "zh-CN"
     
-    @AppStorage("ttsDelaySeconds") private var ttsDelaySeconds: Double = 2
+    @AppStorage("ttsDelaySeconds") private var ttsDelaySeconds: Double = 5
 
     enum ImportMode: String, CaseIterable, Identifiable {
         case skipExisting = "Skip duplicates"
@@ -29,7 +29,7 @@ struct ImportView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
+        Group {
             Picker("Import mode", selection: $importMode) {
                 ForEach(ImportMode.allCases) { mode in
                     Text(mode.rawValue).tag(mode)
@@ -37,8 +37,6 @@ struct ImportView: View {
             }
             .pickerStyle(.menu)
             
-            Divider()
-
             HStack {
                 Text("TTS language:")
                 Spacer()
@@ -50,15 +48,14 @@ struct ImportView: View {
                     .textFieldStyle(.roundedBorder)
             }
             
-            Divider()
-
             Button {
                 showImporter = true
             } label: {
-                Label("CSV file", systemImage: "doc")
+                Label("Select CSV file", systemImage: "doc")
             }
             .disabled(isWorking)
-            
+            .frame(maxWidth: .infinity, alignment: .center)
+
             if isWorking {
                 ProgressView()
                 Text(progressText)
@@ -71,7 +68,6 @@ struct ImportView: View {
             }
 
         }
-        .padding()
         .fileImporter(
             isPresented: $showImporter,
             allowedContentTypes: allowedTypes,

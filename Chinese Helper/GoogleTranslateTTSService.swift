@@ -6,12 +6,25 @@
 //
 
 import Foundation
+import SwiftUI
 
-struct GoogleTranslateTTSService {
+actor GoogleTranslateTTSService {
 
-    /// Google Translate TTS (nieoficjalne, bez klucza API).
-    /// Użycie osobiste/edukacyjne — endpoint może się zmienić w przyszłości.
+    @AppStorage("ttsDelaySeconds") private var ttsDelaySeconds: Double = 5
+    private var lastRequestTime: Date? = nil
+
     func synthesize(text: String, lang: String = "zh-CN") async throws -> Data {
+
+        // RATE LIMIT
+        if let last = lastRequestTime {
+            let elapsed = Date().timeIntervalSince(last)
+            let wait = ttsDelaySeconds - elapsed
+            if wait > 0 {
+                try await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
+            }
+        }
+        lastRequestTime = Date()
+
         var components = URLComponents(string: "https://translate.google.com/translate_tts")!
         components.queryItems = [
             .init(name: "ie", value: "UTF-8"),
@@ -27,7 +40,6 @@ struct GoogleTranslateTTSService {
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
 
-        // 🔴 KLUCZOWE NAGŁÓWKI
         req.setValue(
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
             forHTTPHeaderField: "User-Agent"
