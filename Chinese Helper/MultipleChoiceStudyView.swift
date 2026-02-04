@@ -52,8 +52,10 @@ struct MultipleChoiceStudyView: View {
             }
         }
         .padding()
-        .onAppear {
-            generateOptions()
+        .task(id: word.id) {
+            if options.isEmpty {
+                generateOptions()
+            }
         }
         .onChange(of: word.id) { _ in
             reset()
@@ -64,9 +66,24 @@ struct MultipleChoiceStudyView: View {
     // MARK: - Helpers
 
     private func generateOptions() {
-        let others = allWords.filter { $0.id != word.id }.shuffled()
-        let distractors = Array(others.prefix(3))
-        options = (distractors + [word]).shuffled()
+        var pool = allWords.filter { $0.id != word.id }
+
+        if pool.count < 3 {
+            options = [word]
+            return
+        }
+
+        var rng1 = SeededGenerator(seed: word.id.hashValue)
+        pool.shuffle(using: &rng1)
+
+        let distractors = Array(pool.prefix(3))
+
+        var result = distractors + [word]
+
+        var rng2 = SeededGenerator(seed: word.id.hashValue ^ 0xDEADBEEF)
+        result.shuffle(using: &rng2)
+
+        options = result
     }
 
     private func reset() {

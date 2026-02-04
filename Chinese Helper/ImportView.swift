@@ -48,13 +48,32 @@ struct ImportView: View {
                     .textFieldStyle(.roundedBorder)
             }
             
-            Button {
-                showImporter = true
-            } label: {
-                Label("Select CSV file", systemImage: "doc")
+            HStack {
+                Text("Request delay: \(Int(ttsDelaySeconds))s")
+                Slider(
+                    value: $ttsDelaySeconds,
+                    in: 1...20,
+                    step: 1
+                ) {
+                    Text("Delay")
+                }
+                //Text("\(Int(ttsDelaySeconds))s")
             }
-            .disabled(isWorking)
-            .frame(maxWidth: .infinity, alignment: .center)
+            
+            HStack {
+                Spacer()
+                Button {
+                    showImporter = true
+                } label: {
+                    Label("Select CSV file", systemImage: "doc")
+                }
+                .disabled(isWorking)
+                //.frame(maxWidth: .infinity, alignment: .center)
+                .glassEffect(.regular.tint(.blue))
+                .buttonStyle(.glass)
+                .tint(.blue)
+                Spacer()
+            }
 
             if isWorking {
                 ProgressView()

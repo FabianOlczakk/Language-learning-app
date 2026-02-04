@@ -312,6 +312,8 @@ struct StudyView: View {
     private func playAudio(for word: WordEntry) {
         if let rel = word.audioRelativePath,
            let url = try? AudioStore.resolve(relativePath: rel) {
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
             audioPlayer.play(url: url)
         }
     }

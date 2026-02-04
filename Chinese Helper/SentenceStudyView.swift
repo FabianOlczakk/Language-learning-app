@@ -59,6 +59,8 @@ struct SentenceStudyView: View {
                         guard !checked else { return }
                         checked = true
                         inputFocused = false
+                        let generator = UIImpactFeedbackGenerator(style: .heavy)
+                        generator.impactOccurred()
                         correct = normalized(input) == normalized(expected)
                         onAnswered(correct)
                     }

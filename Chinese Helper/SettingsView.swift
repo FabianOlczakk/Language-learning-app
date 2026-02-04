@@ -37,7 +37,7 @@ struct SettingsView: View {
                 Section ("Learning"){
                     VStack {
                         Label("Answer in:", systemImage: "flag.badge.ellipsis")
-                        Spacer(minLength: 15.0)
+                            .padding(.bottom, 10)
                         Picker("Learning direction", selection: $learningDirection) {
                             ForEach(LearningDirection.allCases) { dir in
                                 Text(dir.label).tag(dir)
@@ -129,19 +129,6 @@ struct SettingsView: View {
                 
                 Section("Appearance") {
                     Toggle("Transition animation", isOn: $enableTransitionAnimation)
-                }
-                
-                Section("TTS — delay between requests") {
-                    HStack {
-                        Slider(
-                            value: $ttsDelaySeconds,
-                            in: 1...20,
-                            step: 1
-                        ) {
-                            Text("Delay")
-                        }
-                        Text("\(Int(ttsDelaySeconds))s")
-                    }
                 }
                 
                 Section("Import CSV with speech generation") {

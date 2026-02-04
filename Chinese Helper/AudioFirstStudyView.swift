@@ -98,6 +98,8 @@ struct AudioFirstStudyView: View {
     private func playAudio() {
         if let rel = word.audioRelativePath,
            let url = try? AudioStore.resolve(relativePath: rel) {
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
             audioPlayer.play(url: url)
         }
     }
