@@ -60,32 +60,38 @@ struct ImportView: View {
                 //Text("\(Int(ttsDelaySeconds))s")
             }
             
-            HStack {
-                Spacer()
-                Button {
-                    showImporter = true
-                } label: {
-                    Label("Select CSV file", systemImage: "doc")
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        showImporter = true
+                    } label: {
+                        Label("Select CSV file", systemImage: "doc")
+                    }
+                    .disabled(isWorking)
+                    //.frame(maxWidth: .infinity, alignment: .center)
+                    .glassEffect(.regular.tint(.blue))
+                    .buttonStyle(.glass)
+                    .tint(.blue)
+                    Spacer()
                 }
-                .disabled(isWorking)
-                //.frame(maxWidth: .infinity, alignment: .center)
-                .glassEffect(.regular.tint(.blue))
-                .buttonStyle(.glass)
-                .tint(.blue)
-                Spacer()
+                
+                Group {
+                    if isWorking {
+                        ProgressView()
+                        Text(progressText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else if !progressText.isEmpty {
+                        Text(progressText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .padding(.top, 10)
             }
-
-            if isWorking {
-                ProgressView()
-                Text(progressText)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            } else if !progressText.isEmpty {
-                Text(progressText)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
         }
         .fileImporter(
             isPresented: $showImporter,
@@ -162,7 +168,7 @@ struct ImportView: View {
                 }
 
                 let totalCount = try ctx.fetchCount(FetchDescriptor<WordEntry>())
-                progressText = "Import ended successfully. Imported: \(imported), skipped: \(skipped). Total in database: \(totalCount)."
+                progressText = "Import ended successfully.\nImported: \(imported)\nSkipped: \(skipped)\nTotal in database: \(totalCount)."
             } catch {
                 progressText = "Error: \(error.localizedDescription)"
             }

@@ -244,6 +244,25 @@ struct StudyView: View {
                             selectNextMode()
                         }
                     }
+                    .onChange(of: allWords.count) { newCount in
+                        guard newCount > 0 else { return }
+
+                        // jeśli wcześniej nie było słówek → startuj sesję
+                        if session.queue.isEmpty {
+                            session.applySettings(
+                                batchSize: batchSize,
+                                minShowsPerCard: minShowsPerCard,
+                                easyRequiredEasy: easyRequiredEasy,
+                                mediumRequiredEasy: mediumRequiredEasy,
+                                hardRequiredEasy: hardRequiredEasy,
+                                hardReinsertOffset: hardReinsertOffset,
+                                shuffleNewBatch: shuffleNewBatch
+                            )
+
+                            session.startNewSession(from: allWords)
+                            selectNextMode()
+                        }
+                    }
                     
                     let c0 = transitionColor.adjusted(brightness: +0.18, saturation: +0.15)
                     let c1 = transitionColor

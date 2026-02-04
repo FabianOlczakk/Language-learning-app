@@ -26,6 +26,9 @@ struct SettingsView: View {
     @AppStorage("modeSentence") private var modeSentence: Bool = false
     @AppStorage("learningDirection") private var learningDirection: LearningDirection = .plToZh
     
+    @State private var showResetConfirm = false
+    @State private var showDeleteConfirm = false
+    
     @AppStorage("enableTransitionAnimation")
     private var enableTransitionAnimation: Bool = true
 
@@ -134,21 +137,51 @@ struct SettingsView: View {
                 Section("Import CSV with speech generation") {
                     ImportView()
                 }
-
-                Section("Danger zone") {
-
-                    Button(role: .destructive) {
-                        resetLearningProgress()
-                    } label: {
-                        Text("Reset learning progress")
+                
+                NavigationLink {
+                    Form {
+                        Section("Danger zone") {
+                            
+                            Button(role: .destructive) {
+                                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                                showResetConfirm = true
+                            } label: {
+                                Text("Reset learning progress")
+                            }
+                            .confirmationDialog(
+                                "Are you sure you want to reset learning progress?",
+                                isPresented: $showResetConfirm,
+                                titleVisibility: .visible
+                            ) {
+                                Button("Reset", role: .destructive) {
+                                    resetLearningProgress()
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            }
+                            
+                            Button(role: .destructive) {
+                                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                                showDeleteConfirm = true
+                            } label: {
+                                Text("Delete all words")
+                            }
+                            .confirmationDialog(
+                                "This will permanently delete all words. Are you sure?",
+                                isPresented: $showDeleteConfirm,
+                                titleVisibility: .visible
+                            ) {
+                                Button("Delete", role: .destructive) {
+                                    deleteAllWords()
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            }
+                        }
                     }
-
-                    Button(role: .destructive) {
-                        deleteAllWords()
-                    } label: {
-                        Text("Delete all words")
-                    }
+                } label: {
+                    Label("Danger zone", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
                 }
+                .navigationTitle("Danger zone")
             }
             .navigationTitle("Settings")
         }
