@@ -11,7 +11,8 @@ import SwiftUI
 
 final class LearningSession: ObservableObject {
 
-    @Published var queue: [WordEntry] = []
+    //@Published var queue: [WordEntry] = []
+    @Published var queue: [BatchItem] = []
 
     // SETTINGS (domyślne wartości)
     var batchSize: Int = 15
@@ -47,49 +48,60 @@ final class LearningSession: ObservableObject {
     }
 
     func startNewSession(from allWords: [WordEntry]) {
-        let source = shuffleNewBatch ? allWords.shuffled() : allWords
-        queue = Array(source.prefix(max(1, batchSize)))
+        let shuffled = shuffleNewBatch ? allWords.shuffled() : allWords
+        let slice = Array(shuffled.prefix(batchSize))
 
-        for w in queue {
-            w.easyCount = 0
-            w.seenCount = 0
-            w.isLearned = false
+        queue = slice.map {
+            BatchItem(id: $0.id, word: $0, mark: .none)
+        }
+
+        for item in queue {
+            item.word.easyCount = 0
+            item.word.seenCount = 0
+            item.word.isLearned = false
         }
     }
 
-    func current() -> WordEntry? { queue.first }
+    func current() -> WordEntry? {
+        queue.first?.word
+    }
 
     func answerEasy() {
-        guard let w = queue.first else { return }
-        w.seenCount += 1
-        w.easyCount += 1
+        guard var item = queue.first else { return }
+
+        item.mark = .easy
+        item.word.seenCount += 1
+        item.word.easyCount += 1
+
         queue.removeFirst()
 
-        let required = requiredEasy(for: w)
-        if w.easyCount >= required && w.seenCount >= minShowsPerCard {
-            confirm(w)
+        if item.word.easyCount >= requiredEasy(for: item.word),
+           item.word.seenCount >= minShowsPerCard {
+            confirm(item.word)
         } else {
-            queue.append(w)
+            queue.append(item)   // ⬅️ kwadrat idzie na koniec
         }
     }
 
     func answerMedium() {
-        guard let w = queue.first else { return }
-        w.seenCount += 1
-        queue.removeFirst()
+        guard var item = queue.first else { return }
 
-        // medium: przerzucamy na koniec, ale wymaga mediumRequiredEasy easy-tapów do zaliczenia
-        // (wymaganie realizuje requiredEasy(for:))
-        queue.append(w)
+        item.mark = .medium
+        item.word.seenCount += 1
+
+        queue.removeFirst()
+        queue.append(item)
     }
 
     func answerHard() {
-        guard let w = queue.first else { return }
-        w.seenCount += 1
-        queue.removeFirst()
+        guard var item = queue.first else { return }
 
-        let idx = min(max(1, hardReinsertOffset), queue.count)
-        queue.insert(w, at: idx)
+        item.mark = .hard
+        item.word.seenCount += 1
+
+        queue.removeFirst()
+        let idx = min(hardReinsertOffset, queue.count)
+        queue.insert(item, at: idx)
     }
 
     private func requiredEasy(for w: WordEntry) -> Int {
@@ -108,4 +120,26 @@ final class LearningSession: ObservableObject {
     }
 
     var isFinished: Bool { queue.isEmpty }
+}
+
+enum BatchMark {
+    case none
+    case hard
+    case medium
+    case easy
+
+    var color: Color {
+        switch self {
+        case .none:   return Color.gray.opacity(0.3)
+        case .hard:   return .red
+        case .medium: return .orange
+        case .easy:   return .green
+        }
+    }
+}
+
+struct BatchItem: Identifiable {
+    let id: UUID
+    let word: WordEntry
+    var mark: BatchMark = .none
 }

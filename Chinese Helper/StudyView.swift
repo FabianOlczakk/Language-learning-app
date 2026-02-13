@@ -75,6 +75,9 @@ struct StudyView: View {
 
                 ZStack {
                     VStack(spacing: 24) {
+                        BatchProgressBar(items: session.queue)
+                            .padding(.top, 10)
+                        
                         Spacer()
                         
                         if let word = session.current() {
@@ -135,7 +138,7 @@ struct StudyView: View {
                                                 origin: hardButtonCenter,
                                                 screenSize: screenSize
                                             ) {
-                                                session.answerEasy()
+                                                session.answerHard()
                                                 advance()
                                             }
                                         } else {
@@ -158,7 +161,7 @@ struct StudyView: View {
                                                 origin: mediumButtonCenter,
                                                 screenSize: screenSize
                                             ) {
-                                                session.answerEasy()
+                                                session.answerMedium()
                                                 advance()
                                             }
                                         } else {
